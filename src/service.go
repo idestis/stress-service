@@ -50,8 +50,8 @@ func main() {
 	})
 	testing := r.Group("/testing")
 	{
-		testing.GET("/start", startTestHandler)
-		testing.GET("/stop", stopTestHandler)
+		testing.GET("/start", startHandler)
+		testing.GET("/stop", stopHandler)
 		// Configurations routes to read and update default config
 		testing.GET("/config", func(ctx *gin.Context) {
 			ctx.JSON(http.StatusOK, cfg)
@@ -66,35 +66,32 @@ func main() {
 	r.Run(fmt.Sprintf(":%v", port))
 }
 
-func startTestHandler(ctx *gin.Context) {
+func startHandler(ctx *gin.Context) {
 	if status == StatusStarted {
-		ctx.JSON(http.StatusOK, Response{Message: "Test already in progress", Status: status})
+		ctx.JSON(http.StatusOK, Response{Message: "Simulation CPU load already in progress.", Status: status})
 	}
 	status = StatusStarted
-	// stop <- false
-	t := time.Now()
 	go runCPULoad(cfg.TestTimeSeconds, cfg.PercentageCPU)
-	message := fmt.Sprintf("Test started at %v", t)
-	ctx.JSON(http.StatusOK, Response{Message: message, Status: status})
+	ctx.JSON(http.StatusOK, Response{Message: "Simulation CPU load started at.", Status: status})
 }
 
-func stopTestHandler(ctx *gin.Context) {
+func stopHandler(ctx *gin.Context) {
 	if status == StatusStopped {
-		ctx.JSON(http.StatusOK, Response{Message: "Test is not started", Status: status})
+		ctx.JSON(http.StatusOK, Response{Message: "Simulation CPU load was not initialized.", Status: status})
 		return
 	}
 	status = StatusStopped
 	// Send stop signal
 	close(stop)
 	<-stop
-	ctx.JSON(http.StatusOK, Response{Message: "Test has been stoped by signal", Status: status})
+	ctx.JSON(http.StatusOK, Response{Message: "Simulation CPU load has been stopped by signal", Status: status})
 }
 
 func setConfigHandler(ctx *gin.Context) {
 	c := new(Config)
 	if err := ctx.Bind(c); err != nil {
 		ctx.JSON(http.StatusBadRequest, Response{
-			Message: "Unable to bind retrived data.",
+			Message: "Unable to bind retrived JSON data.",
 			Status:  "error",
 		})
 		return
@@ -138,5 +135,6 @@ func runCPULoad(timeSeconds int, percentage int) {
 		}()
 	}
 	time.Sleep(time.Duration(timeSeconds) * time.Second)
+	status = StatusStopped
 	log.Println("Simulating CPU has been ended.")
 }
