@@ -2,21 +2,29 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"runtime"
 	"time"
 
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"github.com/gin-gonic/gin"
 )
 
 var (
-	testStatus string = "stopped"
-	cfg        Config = Config{
+	status string = "stopped"
+	cfg    Config = Config{
 		TestTimeSeconds: 300,
-		PercentageCPU:   80,
+		PercentageCPU:   70,
 	}
+	stop = make(chan struct{})
+)
+
+const (
+	// StatusStarted ...
+	StatusStarted = "started"
+	// StatusStopped ...
+	StatusStopped = "stopped"
 )
 
 type (
@@ -27,61 +35,69 @@ type (
 	}
 	// Response ...
 	Response struct {
-		Data   string `json:"data"`
-		Status string `json:"status"`
+		Message string `json:"message"`
+		Status  string `json:"status"`
 	}
 )
 
 func main() {
-	e := echo.New()
-	e.Use(middleware.Logger())
-	e.Use(middleware.Recover())
+	r := gin.Default()
+	r.Use(gin.Logger())
 
-	// Routes
-	e.GET("/", rootHandler)
-	testing := e.Group("/testing")
-	testing.GET("/start", startTestHandler)
-	testing.GET("/stop", stopTestHandler)
-	testing.POST("/config", setConfigHandler)
-	testing.GET("/config", getConfigHandler)
-	// Start our Service
+	r.GET("/", func(ctx *gin.Context) {
+		// returns the name of the service itself and status for health-check if needed
+		ctx.JSON(http.StatusOK, Response{Message: "stress-service", Status: "ok"})
+	})
+	testing := r.Group("/testing")
+	{
+		testing.GET("/start", startTestHandler)
+		testing.GET("/stop", stopTestHandler)
+		// Configurations routes to read and update default config
+		testing.GET("/config", func(ctx *gin.Context) {
+			ctx.JSON(http.StatusOK, cfg)
+		})
+		testing.POST("/config", setConfigHandler)
+	}
+	// Start the service
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "3000"
 	}
-	e.Logger.Fatal(e.Start(fmt.Sprintf(":%v", port)))
+	r.Run(fmt.Sprintf(":%v", port))
 }
 
-func rootHandler(ctx echo.Context) error {
-	return ctx.JSON(http.StatusOK, Response{Data: "stress-service", Status: "ok"})
-}
-
-func startTestHandler(ctx echo.Context) error {
-	if testStatus == "started" {
-		return ctx.JSON(http.StatusOK, Response{Data: "test is already active", Status: testStatus})
+func startTestHandler(ctx *gin.Context) {
+	if status == StatusStarted {
+		ctx.JSON(http.StatusOK, Response{Message: "Test in progress", Status: status})
 	}
-	testStatus = "started"
+	status = StatusStarted
+	// stop <- false
 	t := time.Now()
 	go runCPULoad(cfg.TestTimeSeconds, cfg.PercentageCPU)
-	message := fmt.Sprintf("Test started at %v with %v", t, cfg)
-	return ctx.JSON(http.StatusOK, Response{Data: message, Status: testStatus})
+	message := fmt.Sprintf("Test started at %v", t)
+	ctx.JSON(http.StatusOK, Response{Message: message, Status: status})
 }
 
-func stopTestHandler(ctx echo.Context) error {
-	if testStatus == "stopped" {
-		return ctx.JSON(http.StatusOK, Response{Data: "test was not started", Status: testStatus})
+func stopTestHandler(ctx *gin.Context) {
+	if status == StatusStopped {
+		ctx.JSON(http.StatusOK, Response{Message: "Test is not started", Status: status})
+		return
 	}
-	testStatus = "stoped"
-	return ctx.JSON(http.StatusOK, Response{Data: "time-and-date", Status: testStatus})
+	status = StatusStopped
+	// Send stop signal
+	close(stop)
+	<-stop
+	ctx.JSON(http.StatusOK, Response{Message: "Test has been stoped by signal", Status: status})
 }
 
-func setConfigHandler(ctx echo.Context) (err error) {
+func setConfigHandler(ctx *gin.Context) {
 	c := new(Config)
 	if err := ctx.Bind(c); err != nil {
-		return ctx.JSON(http.StatusBadRequest, Response{
-			Data:   "",
-			Status: "error",
+		ctx.JSON(http.StatusBadRequest, Response{
+			Message: "Unable to bind retrived data.",
+			Status:  "error",
 		})
+		return
 	}
 	if c.TestTimeSeconds != 0 {
 		cfg.TestTimeSeconds = c.TestTimeSeconds
@@ -89,33 +105,41 @@ func setConfigHandler(ctx echo.Context) (err error) {
 	if c.PercentageCPU != 0 {
 		cfg.PercentageCPU = c.PercentageCPU
 	}
-	return ctx.JSON(http.StatusCreated, cfg)
-}
-
-func getConfigHandler(ctx echo.Context) error {
-	return ctx.JSON(http.StatusOK, cfg)
+	ctx.JSON(http.StatusCreated, cfg)
 }
 
 func runCPULoad(timeSeconds int, percentage int) {
+
 	numCPU := runtime.NumCPU()
 	runtime.GOMAXPROCS(numCPU)
-	// 1 unit = 100 ms may be the best
-	unitHundresOfMicrosecond := 1000
-	runMicrosecond := unitHundresOfMicrosecond * percentage
-	sleepMicrosecond := unitHundresOfMicrosecond*100 - runMicrosecond
-	for i := 0; i < numCPU; i++ {
+	unitMs := 1000 // 1 unit = 100 ms may be the best
+	runMs := unitMs * percentage
+	sleepMs := unitMs*100 - runMs
+	log.Println("runCPULoad has been started")
+	// This loop will load all available cores
+	for i := 1; i <= numCPU; i++ {
 		go func() {
+			// stop <- false
+			fmt.Println(stop)
+			// LockOSThread wires the calling goroutine to its current operating system thread.
 			runtime.LockOSThread()
 			for { // endless loop
 				begin := time.Now()
-				for {
-					if time.Now().Sub(begin) > time.Duration(runMicrosecond)*time.Microsecond {
-						break
+				select {
+				case <-stop:
+					log.Println("Test has been stopped by signal on all cores")
+					return
+				default:
+					for {
+						if time.Now().Sub(begin) > time.Duration(runMs)*time.Microsecond {
+							break
+						}
 					}
 				}
-				time.Sleep(time.Duration(sleepMicrosecond) * time.Microsecond)
+				time.Sleep(time.Duration(sleepMs) * time.Microsecond)
 			}
 		}()
 	}
 	time.Sleep(time.Duration(timeSeconds) * time.Second)
+	log.Println("Test has been ended")
 }
