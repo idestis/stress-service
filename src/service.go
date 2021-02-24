@@ -114,7 +114,7 @@ func runCPULoad(timeSeconds int, percentage int) {
 	unitMs := 1000 // 1 unit = 100 ms may be the best
 	runMs := unitMs * percentage
 	sleepMs := unitMs*100 - runMs
-	log.Println("runCPULoad has been started")
+	log.Println("Simulating CPU load has been started.")
 	// This loop will load all available cores
 	for i := 1; i <= numCPU; i++ {
 		go func() {
@@ -124,7 +124,7 @@ func runCPULoad(timeSeconds int, percentage int) {
 				begin := time.Now()
 				select {
 				case <-stop:
-					log.Println("Test has been stopped by signal on all cores")
+					log.Println("Simulating CPU load has been stopped by signal on all cores.")
 					return
 				default:
 					for {
@@ -138,5 +138,5 @@ func runCPULoad(timeSeconds int, percentage int) {
 		}()
 	}
 	time.Sleep(time.Duration(timeSeconds) * time.Second)
-	log.Println("Test has been ended")
+	log.Println("Simulating CPU has been ended.")
 }
