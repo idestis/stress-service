@@ -48,15 +48,15 @@ func main() {
 		// returns the name of the service itself and status for health-check if needed
 		ctx.JSON(http.StatusOK, Response{Message: "stress-service", Status: "ok"})
 	})
-	testing := r.Group("/testing")
+	sim := r.Group("/simulation") // /simulation
 	{
-		testing.GET("/start", startHandler)
-		testing.GET("/stop", stopHandler)
+		sim.GET("/start", startHandler) // GET /simulation/start
+		sim.GET("/stop", stopHandler)   // GET /simulation/stop
 		// Configurations routes to read and update default config
-		testing.GET("/config", func(ctx *gin.Context) {
+		sim.GET("/config", func(ctx *gin.Context) { // GET /simulation/config
 			ctx.JSON(http.StatusOK, cfg)
 		})
-		testing.POST("/config", setConfigHandler)
+		sim.POST("/config", setConfigHandler) // POST /simulation/config
 	}
 	// Start the service
 	port := os.Getenv("PORT")
