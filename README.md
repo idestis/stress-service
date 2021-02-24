@@ -40,19 +40,21 @@ import (
 // TestAutoScalingCapabilities ...
 func TestAutoScalingCapabilities(t *testing.T) {
   t.Parallel()
-
-  ReadinessTimeout time.Duration = 120 * time.Second
-  scaleTimeout time.Duration = 300 * time.Second
-
+  
+  // Timeouts
+  ReadinessTimeout time.Duration  = 120 * time.Second
+  scaleTimeout time.Duration      = 300 * time.Second
+  
+  // Terraform Variables
   clusterName := "stress-demo"
   serviceName := "stress-service"
-  region := "us-east-1"
+  region      := "us-east-1"
 
   terraformOptions := terraform.WithDefaultRetryableErrors(t, &terraform.Options{
     // Set the path to the Terraform code that will be tested.
     TerraformDir: "../examples/fargate-service-terraform",
     Vars: map[string]interface{}{
-      "aws_region": region,
+      "aws_region":   region,
       "cluster_name": clusterName,
       "service_name": serviceName,
     },
@@ -91,13 +93,13 @@ func TestAutoScalingCapabilities(t *testing.T) {
   resp, _ := http.Get(fmt.Sprintf("%v/simulation/start", hostname))
   time.Sleep(scaleTimout)
 
-  // Get service running count after upscale
+  // Get service running count after the upscale
   serviceRunningCount := aws_sdk.Int64Value(service.RunningCount)
   assert.Equal(t, int64(5), serviceRunningCount)
   // Stop the CPU load simulation and wait downscaleTimeout
   resp, _ := http.Get(fmt.Sprintf("%v/simulation/stop", hostname))
   time.Sleep(scaleTimout)
-  // Retreive service running count after downscale
+  // Retreive service running count after the downscale
   serviceRunningCount := aws_sdk.Int64Value(service.RunningCount)
   assert.Equal(t, int64(5), serviceRunningCount)
 }
