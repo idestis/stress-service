@@ -68,7 +68,7 @@ func main() {
 
 func startTestHandler(ctx *gin.Context) {
 	if status == StatusStarted {
-		ctx.JSON(http.StatusOK, Response{Message: "Test in progress", Status: status})
+		ctx.JSON(http.StatusOK, Response{Message: "Test already in progress", Status: status})
 	}
 	status = StatusStarted
 	// stop <- false
@@ -109,7 +109,6 @@ func setConfigHandler(ctx *gin.Context) {
 }
 
 func runCPULoad(timeSeconds int, percentage int) {
-
 	numCPU := runtime.NumCPU()
 	runtime.GOMAXPROCS(numCPU)
 	unitMs := 1000 // 1 unit = 100 ms may be the best
@@ -119,8 +118,6 @@ func runCPULoad(timeSeconds int, percentage int) {
 	// This loop will load all available cores
 	for i := 1; i <= numCPU; i++ {
 		go func() {
-			// stop <- false
-			fmt.Println(stop)
 			// LockOSThread wires the calling goroutine to its current operating system thread.
 			runtime.LockOSThread()
 			for { // endless loop
