@@ -73,7 +73,7 @@ func startHandler(ctx *gin.Context) {
 	status = StatusStarted
 	stop = make(chan struct{})
 	go runCPULoad(cfg.TestTimeSeconds, cfg.PercentageCPU)
-	ctx.JSON(http.StatusOK, Response{Message: "Simulation CPU load started at.", Status: status})
+	ctx.JSON(http.StatusOK, Response{Message: "Simulation CPU load started.", Status: status})
 }
 
 func stopHandler(ctx *gin.Context) {
