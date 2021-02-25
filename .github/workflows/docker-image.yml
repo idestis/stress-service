@@ -33,17 +33,17 @@ jobs:
     - name: Login to GitHub Packages
       uses: docker/login-action@v1
       with:
-        registry: docker.pkg.github.com
+        registry: ghcr.io
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
     - name: Push to GitHub Packages
       uses: docker/build-push-action@v2.3.0
       with:
-        registry: docker.pkg.github.com
+        registry: ghcr.io
         repository: idestis/stress-service/stress-service
         tags: |
-          destis/stress-service:latest
-          destis/stress-service:${{ env.GIT_REF }}
+          ghcr.io/destis/stress-service:latest
+          ghcr.io/destis/stress-service:${{ env.GIT_REF }}
         push: true
     - name: Image digest
       run: echo ${{ steps.docker_build.outputs.digest }}
