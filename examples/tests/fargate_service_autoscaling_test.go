@@ -21,7 +21,7 @@ func TestAutoScalingCapabilities(t *testing.T) {
 	createdTime := time.Now().Format("150405")
 	// Timeouts
 	scaleTimeout := 240 * time.Second
-	readinessTimeout := 120 * time.Second
+	readinessTimeout := 60 * time.Second
 
 	// Terraform Variables
 	region := "us-east-1"
@@ -90,7 +90,7 @@ func TestAutoScalingCapabilities(t *testing.T) {
 		url+"/simulation/stop",
 		nil,
 		200,
-		"{\"message\":\"Simulation CPU load has been stopped by signal\",\"status\":\"stopped\"}",
+		"{\"message\":\"Simulation CPU load has been stopped by signal.\",\"status\":\"stopped\"}",
 		5,
 		15*time.Second,
 	)

@@ -69,6 +69,7 @@ func main() {
 func startHandler(ctx *gin.Context) {
 	if status == StatusStarted {
 		ctx.JSON(http.StatusOK, Response{Message: "Simulation CPU load already in progress.", Status: status})
+		return
 	}
 	status = StatusStarted
 	stop = make(chan struct{})
@@ -85,7 +86,7 @@ func stopHandler(ctx *gin.Context) {
 	// Send stop signal
 	close(stop)
 	<-stop
-	ctx.JSON(http.StatusOK, Response{Message: "Simulation CPU load has been stopped by signal", Status: status})
+	ctx.JSON(http.StatusOK, Response{Message: "Simulation CPU load has been stopped by signal.", Status: status})
 }
 
 func setConfigHandler(ctx *gin.Context) {
@@ -137,5 +138,8 @@ func runCPULoad(timeSeconds int, percentage int) {
 	}
 	time.Sleep(time.Duration(timeSeconds) * time.Second)
 	status = StatusStopped
-	log.Println("Simulating CPU has been ended.")
+	// Send close signal to stop all running simulations
+	close(stop)
+	<-stop
+	log.Println("Simulating CPU has been ended by timeout.")
 }

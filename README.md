@@ -116,7 +116,7 @@ func TestAutoScalingCapabilities(t *testing.T) {
     url+"/simulation/stop",
     nil,
     200,
-    "{\"message\":\"Simulation CPU load has been stopped by signal\",\"status\":\"stopped\"}",
+    "{\"message\":\"Simulation CPU load has been stopped by signal.\",\"status\":\"stopped\"}",
     5,
     15*time.Second,
   )
