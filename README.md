@@ -1,6 +1,6 @@
 # Stress Service
 
-Service generates CPU load on any environment, useful to test auto scaling capabilities on AWS or GCP.
+Current service can simulate CPU load on any environment, useful to test auto scaling capabilities on AWS or GCP. Controllable start/stop allows you to test upscale and downscale.
 
 ## Build
 
