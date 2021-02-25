@@ -10,6 +10,9 @@ jobs:
     steps:
     - name: Check out the repo
       uses: actions/checkout@v2
+    - name: Set Environment Variables
+      run: |
+        echo "GIT_REF=$(git symbolic-ref -q --short HEAD || git describe --tags --exact-match)" >> $GITHUB_ENV
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v1
     - name: Set up Docker Buildx
@@ -23,7 +26,9 @@ jobs:
       uses: docker/build-push-action@v2.3.0
       with:
         repository: destis/stress-service
-        tags: destis/stress-service:latest
+        tags: |
+          destis/stress-service:latest
+          destis/stress-service:${{ env.GIT_REF }}
         push: true
     - name: Login to GitHub Packages
       uses: docker/login-action@v1
@@ -36,7 +41,9 @@ jobs:
       with:
         registry: docker.pkg.github.com
         repository: idestis/stress-service/stress-service
-        tag_with_ref: true
+        tags: |
+          destis/stress-service:latest
+          destis/stress-service:${{ env.GIT_REF }}
         push: true
     - name: Image digest
       run: echo ${{ steps.docker_build.outputs.digest }}
