@@ -93,9 +93,6 @@ func TestAutoScalingCapabilities(t *testing.T) {
   assert.Equal(t, int64(1), activeCount)
   logger.Logf(t, "Active service count is %s", fmt.Sprint(activeCount))
 
-  //Lookup the ECS Service
-  service := aws.GetEcsService(t, region, clusterName, serviceName)
-
   // Start the CPU load simulation and wait upscaleTimeout
   http_helper.HttpGetWithRetry(
     t,
@@ -109,6 +106,7 @@ func TestAutoScalingCapabilities(t *testing.T) {
   logger.Logf(t, "Sleep for %v as upscale activity timeout.", fmt.Sprint(scaleTimeout))
   time.Sleep(scaleTimeout)
   // Get service running count after the upscale
+  service := aws.GetEcsService(t, region, clusterName, serviceName)
   serviceRunningCount := aws_sdk.Int64Value(service.RunningCount)
   assert.Equal(t, int64(2), serviceRunningCount)
 
@@ -125,6 +123,7 @@ func TestAutoScalingCapabilities(t *testing.T) {
   logger.Logf(t, "Sleep for %v as downscale activity timeout.", fmt.Sprint(scaleTimeout))
   time.Sleep(scaleTimeout)
   // Retreive service running count after the downscale
+  service = aws.GetEcsService(t, region, clusterName, serviceName)
   serviceRunningCount = aws_sdk.Int64Value(service.RunningCount)
   assert.Equal(t, int64(1), serviceRunningCount)
 }
