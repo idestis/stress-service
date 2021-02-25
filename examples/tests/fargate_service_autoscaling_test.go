@@ -80,7 +80,7 @@ func TestAutoScalingCapabilities(t *testing.T) {
 		5,
 		15*time.Second,
 	)
-	logger.Logf(t, "Sleep for %v as sclae activity timeout.", fmt.Sprint(scaleTimeout))
+	logger.Logf(t, "Sleep for %v as upscale activity timeout.", fmt.Sprint(scaleTimeout))
 	time.Sleep(scaleTimeout)
 	// Get service running count after the upscale
 	serviceRunningCount := aws_sdk.Int64Value(service.RunningCount)
@@ -96,7 +96,7 @@ func TestAutoScalingCapabilities(t *testing.T) {
 		5,
 		15*time.Second,
 	)
-	logger.Logf(t, "Sleep for %v as sclae activity timeout.", fmt.Sprint(scaleTimeout))
+	logger.Logf(t, "Sleep for %v as downscale activity timeout.", fmt.Sprint(scaleTimeout))
 	time.Sleep(scaleTimeout)
 	// Retreive service running count after the downscale
 	serviceRunningCount = aws_sdk.Int64Value(service.RunningCount)

@@ -106,7 +106,7 @@ func TestAutoScalingCapabilities(t *testing.T) {
     5,
     15*time.Second,
   )
-  logger.Logf(t, "Sleep for %v as sclae activity timeout.", fmt.Sprint(scaleTimeout))
+  logger.Logf(t, "Sleep for %v as upscale activity timeout.", fmt.Sprint(scaleTimeout))
   time.Sleep(scaleTimeout)
   // Get service running count after the upscale
   serviceRunningCount := aws_sdk.Int64Value(service.RunningCount)
@@ -122,13 +122,15 @@ func TestAutoScalingCapabilities(t *testing.T) {
     5,
     15*time.Second,
   )
-  logger.Logf(t, "Sleep for %v as sclae activity timeout.", fmt.Sprint(scaleTimeout))
+  logger.Logf(t, "Sleep for %v as downscale activity timeout.", fmt.Sprint(scaleTimeout))
   time.Sleep(scaleTimeout)
   // Retreive service running count after the downscale
   serviceRunningCount = aws_sdk.Int64Value(service.RunningCount)
   assert.Equal(t, int64(1), serviceRunningCount)
 }
 ```
+
+Using `go test -timeout 1h -run ^TestAutoScalingCapabilities$ github.com/Toyota-Motor-North-America/ace-aws-blueprint-ecs -v` run this test in your AWS sandbox environment
 
 ## Service Documentation
 
@@ -253,3 +255,8 @@ The following information is a set of guidelines for contributing to `stress-ser
 When you are good with Go, you can fork this repo and suggest changes via Pull Requests. Please read an official documentation provided by GitHub.
 
 [docs.github.com/creating-a-pull-request-from-a-fork](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request-from-a-fork)
+
+
+### **Consulting**
+
+To discuss more complex use-cases such as step-scaling you can contact me directly [idestis@gmail.com](mailto:idestis@gmail.com)
