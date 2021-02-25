@@ -20,7 +20,8 @@ func TestAutoScalingCapabilities(t *testing.T) {
 	// createdTime will use instance local time to create unique service
 	createdTime := time.Now().Format("150405")
 	// Timeouts
-	scaleTimeout := 240 * time.Second
+	upscaleTimeout := 300 * time.Second
+	downscaleTimeout := 420 * time.Second
 	readinessTimeout := 60 * time.Second
 
 	// Terraform Variables
@@ -44,7 +45,7 @@ func TestAutoScalingCapabilities(t *testing.T) {
 	terraform.InitAndApply(t, terraformOptions)
 
 	// Run `terraform output` to get the values of output variables and check they have the expected values.
-	hostname := terraform.Output(t, terraformOptions, "lb_dns_name")
+	hostname := terraform.Output(t, terraformOptions, "dns_record")
 
 	url := fmt.Sprintf("http://%s", hostname)
 
@@ -77,8 +78,8 @@ func TestAutoScalingCapabilities(t *testing.T) {
 		5,
 		15*time.Second,
 	)
-	logger.Logf(t, "Sleep for %v as upscale activity timeout.", fmt.Sprint(scaleTimeout))
-	time.Sleep(scaleTimeout)
+	logger.Logf(t, "Sleep for %v as upscale activity timeout.", fmt.Sprint(upscaleTimeout))
+	time.Sleep(upscaleTimeout)
 	// Get service running count after the upscale
 	service := aws.GetEcsService(t, region, clusterName, serviceName)
 	serviceRunningCount := aws_sdk.Int64Value(service.RunningCount)
@@ -94,8 +95,8 @@ func TestAutoScalingCapabilities(t *testing.T) {
 		5,
 		15*time.Second,
 	)
-	logger.Logf(t, "Sleep for %v as downscale activity timeout.", fmt.Sprint(scaleTimeout))
-	time.Sleep(scaleTimeout)
+	logger.Logf(t, "Sleep for %v as downscale activity timeout.", fmt.Sprint(downscaleTimeout))
+	time.Sleep(downscaleTimeout)
 
 	// Retreive service running count after the downscale
 	service := aws.GetEcsService(t, region, clusterName, serviceName)

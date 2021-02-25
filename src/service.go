@@ -47,7 +47,7 @@ func main() {
 	// Lookup environment variables for configuration
 	cfg.TestTimeSeconds, _ = strconv.Atoi(os.Getenv("TEST_TIME_SECONDS"))
 	if cfg.TestTimeSeconds == 0 {
-		cfg.TestTimeSeconds = 300
+		cfg.TestTimeSeconds = 600
 	}
 	cfg.PercentageCPU, _ = strconv.Atoi(os.Getenv("PERCENTAGE_CPU"))
 	if cfg.PercentageCPU == 0 {
