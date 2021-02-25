@@ -25,7 +25,6 @@ jobs:
     - name: Push to Docker Hub
       uses: docker/build-push-action@v2.3.0
       with:
-        repository: destis/stress-service
         tags: |
           destis/stress-service:latest
           destis/stress-service:${{ env.GIT_REF }}
@@ -40,7 +39,6 @@ jobs:
       uses: docker/build-push-action@v2.3.0
       with:
         registry: ghcr.io
-        repository: idestis/stress-service/stress-service
         tags: |
           ghcr.io/destis/stress-service:latest
           ghcr.io/destis/stress-service:${{ env.GIT_REF }}
