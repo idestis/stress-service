@@ -1,5 +1,7 @@
 # Stress Service
 
+[![Publish Docker Image](https://github.com/idestis/stress-service/actions/workflows/docker-image.yml/badge.svg)](https://github.com/idestis/stress-service/actions/workflows/docker-image.yml)
+
 Current service can simulate CPU load on any environment, useful to test auto scaling capabilities on AWS or GCP. Controllable start/stop allows you to test upscale and downscale.
 
 ## Build
