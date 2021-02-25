@@ -21,6 +21,7 @@ jobs:
         password: ${{ secrets.DOCKER_PASSWORD }}
         repository: destis/stress-service
         tag_with_ref: true
+        tags: destis/stress-service:latest
         push: true
     - name: Push to GitHub Packages
       uses: docker/build-push-action@v2.3.0
@@ -31,3 +32,5 @@ jobs:
         repository: idestis/stress-service/stress-service
         tag_with_ref: true
         push: true
+    - name: Image digest
+      run: echo ${{ steps.docker_build.outputs.digest }}
