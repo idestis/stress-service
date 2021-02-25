@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"runtime"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -14,8 +15,8 @@ import (
 var (
 	status string = "stopped"
 	cfg    Config = Config{
-		TestTimeSeconds: 300,
-		PercentageCPU:   70,
+		TestTimeSeconds: 0,
+		PercentageCPU:   0,
 	}
 	stop = make(chan struct{})
 )
@@ -43,6 +44,15 @@ type (
 func main() {
 	r := gin.Default()
 	r.Use(gin.Logger())
+	// Lookup environment variables for configuration
+	cfg.TestTimeSeconds, _ = strconv.Atoi(os.Getenv("TEST_TIME_SECONDS"))
+	if cfg.TestTimeSeconds == 0 {
+		cfg.TestTimeSeconds = 300
+	}
+	cfg.PercentageCPU, _ = strconv.Atoi(os.Getenv("PERCENTAGE_CPU"))
+	if cfg.PercentageCPU == 0 {
+		cfg.PercentageCPU = 80
+	}
 
 	r.GET("/", func(ctx *gin.Context) {
 		// returns the name of the service itself and status for health-check if needed
