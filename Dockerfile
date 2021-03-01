@@ -13,6 +13,7 @@ WORKDIR /app/
 
 ENV GIN_MODE release
 ENV PORT 3000
+ENV START_AFTER 0
 
 RUN apk --no-cache add ca-certificates
 

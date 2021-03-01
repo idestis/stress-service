@@ -4,6 +4,16 @@
 
 Current service can simulate CPU load on any environment, useful to test auto scaling capabilities on AWS or GCP. Controllable start/stop allows you to test upscale and downscale.
 
+* [Build](#Build)
+* [Use Case](#Use%20Case)
+* [Service Documentation](#Service%20Documentation)
+  * [Simulation Configuration](#Simulation%20Configuration)
+* [Environment Variables](#Environment%20Variables)
+* [Contribute](#Contribute)
+  * [Code of Conduct](#Code%20of%20Conduct)
+  * [Development](#Development)
+* [Consulting](#Consulting)
+
 ## Build
 
 In case if your policy doesn't allow you to pull from GitHub registry, you can build your own image
@@ -219,6 +229,14 @@ This service contains root endpoint `/` which can be used as healthcheck and sim
     {"message":"Simulation CPU load has been stopped by signal.","status":"started"}
     ```
 
+## Environment Variables
+
+You able to configure service using [12factor](https://12factor.net/config) approach, for this purpose we let you to set next environment variables
+
+* `TEST_TIME_SECONDS` *(default: 600)* define the time to stop simulation.
+* `PERCENTAGE_CPU` *(default: 80)* define the amount of CPU used (TBD).
+* `START_AFTER`  *(default: 0)* define the timer when to start simulation automatically on service start. If `0`, test will not start automatically.
+
 ## Contribute
 
 The following information is a set of guidelines for contributing to `stress-service`. These are mostly guidelines, not rules. Use your best and feel free to propose changes using pull request or issues.
@@ -256,7 +274,6 @@ When you are good with Go, you can fork this repo and suggest changes via Pull R
 
 [docs.github.com/creating-a-pull-request-from-a-fork](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request-from-a-fork)
 
-
-### **Consulting**
+## **Consulting**
 
 To discuss more complex use-cases such as step-scaling you can contact me directly [idestis@gmail.com](mailto:idestis@gmail.com)
