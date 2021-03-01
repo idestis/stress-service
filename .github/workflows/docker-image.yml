@@ -26,7 +26,7 @@ jobs:
       uses: docker/build-push-action@v2.3.0
       with:
         tags: |
-          destis/stress-service:latest
+          destis/stress-service/stress-service:latest
           destis/stress-service:${{ env.GIT_REF }}
         push: true
     - name: Login to GitHub Packages
@@ -34,14 +34,12 @@ jobs:
       with:
         registry: docker.pkg.github.com
         username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+        password: ${{ secrets.GH_TOKEN }}
     - name: Push to GitHub Packages
       uses: docker/build-push-action@v2.3.0
       with:
-        registry: docker.pkg.github.com
         tags: |
-          docker.pkg.github.com/destis/stress-service/stress-service:latest
-          docker.pkg.github.com/destis/stress-service/stress-service:${{ env.GIT_REF }}
+          docker.pkg.github.com/idestis/stress-service/stress-service:${{ env.GIT_REF }}
         push: true
     - name: Image digest
       run: echo ${{ steps.docker_build.outputs.digest }}
