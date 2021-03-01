@@ -40,8 +40,8 @@ jobs:
       with:
         registry: docker.pkg.github.com
         tags: |
-          docker.pkg.github.com/destis/stress-service:latest
-          docker.pkg.github.com/destis/stress-service:${{ env.GIT_REF }}
+          docker.pkg.github.com/destis/stress-service/stress-service:latest
+          docker.pkg.github.com/destis/stress-service/stress-service:${{ env.GIT_REF }}
         push: true
     - name: Image digest
       run: echo ${{ steps.docker_build.outputs.digest }}
