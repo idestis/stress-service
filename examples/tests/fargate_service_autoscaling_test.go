@@ -47,7 +47,7 @@ func TestAutoScalingCapabilities(t *testing.T) {
 	// Run `terraform output` to get the values of output variables and check they have the expected values.
 	hostname := terraform.Output(t, terraformOptions, "dns_record")
 
-	url := fmt.Sprintf("http://%s", hostname)
+	url := fmt.Sprintf("https://%s", hostname)
 
 	logger.Logf(t, "Sleep for %v as default readiness timeout.", readinessTimeout)
 	time.Sleep(readinessTimeout)
@@ -99,7 +99,7 @@ func TestAutoScalingCapabilities(t *testing.T) {
 	time.Sleep(downscaleTimeout)
 
 	// Retreive service running count after the downscale
-	service := aws.GetEcsService(t, region, clusterName, serviceName)
+	service = aws.GetEcsService(t, region, clusterName, serviceName)
 	serviceRunningCount = aws_sdk.Int64Value(service.RunningCount)
 	assert.Equal(t, int64(1), serviceRunningCount)
 }
